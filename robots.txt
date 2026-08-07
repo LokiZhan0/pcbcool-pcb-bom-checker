@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://lokizhan0.github.io/pcbcool-pcb-bom-checker/sitemap.xml

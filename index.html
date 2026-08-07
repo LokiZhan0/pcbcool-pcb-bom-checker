@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A free browser-based PCB BOM checker for reference designators, quantities, manufacturer part numbers, footprints, DNP rows, duplicates, and BOM consistency.">
+  <meta name="theme-color" content="#0f172a">
+  <link rel="canonical" href="https://lokizhan0.github.io/pcbcool-pcb-bom-checker/">
+  <meta property="og:title" content="PCB BOM Checker">
+  <meta property="og:description" content="Free browser-based BOM checks for RefDes, quantities, MPNs, footprints, DNP rows, duplicates, and sourcing consistency.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://lokizhan0.github.io/pcbcool-pcb-bom-checker/">
+  <meta name="twitter:card" content="summary">
+  <title>PCB BOM Checker</title>
+  <link rel="stylesheet" href="styles.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "PCB BOM Checker",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Web",
+    "isAccessibleForFree": true,
+    "url": "https://lokizhan0.github.io/pcbcool-pcb-bom-checker/",
+    "description": "Free browser-based PCB BOM checker for reference designators, quantities, manufacturer part numbers, footprints, DNP rows, duplicates, and sourcing consistency."
+  }
+  </script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="shell header-inner">
+      <a class="brand" href="#top" aria-label="PCB BOM Checker home">
+        <span class="brand-mark" aria-hidden="true">BOM</span>
+        <span>PCB BOM Checker</span>
+      </a>
+      <nav class="header-links" aria-label="Primary">
+        <a href="#checker">Checker</a>
+        <a href="#rules">Rules</a>
+        <a href="#guide">Guide</a>
+        <a href="https://github.com/LokiZhan0/pcbcool-pcb-bom-checker" target="_blank" rel="noopener">GitHub</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero shell">
+      <div class="hero-copy">
+        <p class="eyebrow">Free engineering utility</p>
+        <h1>Check a PCB BOM before it reaches purchasing or assembly.</h1>
+        <p class="hero-text">Find missing fields, duplicate reference designators, quantity mismatches, DNP conflicts, part-number inconsistencies, duplicate rows, and other common BOM problems in CSV, TSV, XLSX, and XLS files.</p>
+        <div class="privacy-note"><span class="status-dot"></span><strong>Runs in your browser.</strong> Your BOM is analyzed locally and is not uploaded to a server.</div>
+      </div>
+      <aside class="hero-summary" aria-label="What it checks">
+        <div><strong>Reference integrity</strong><span>Duplicates, ranges, malformed references</span></div>
+        <div><strong>Quantity integrity</strong><span>Invalid values and RefDes count mismatches</span></div>
+        <div><strong>Sourcing identity</strong><span>Manufacturer, MPN, supplier P/N consistency</span></div>
+        <div><strong>Assembly data</strong><span>Footprints, DNP/DNI flags, release coverage</span></div>
+      </aside>
+    </section>
+
+    <section id="checker" class="shell app-section">
+      <div class="upload-card" id="dropZone">
+        <input id="fileInput" type="file" accept=".csv,.tsv,.txt,.xlsx,.xls,.xlsm,.xlsb" hidden>
+        <div class="upload-icon" aria-hidden="true">↑</div>
+        <h2>Drop your BOM here</h2>
+        <p>CSV, TSV, TXT, XLSX, XLS, XLSM, or XLSB</p>
+        <div class="button-row center">
+          <button class="btn primary" id="chooseFileBtn" type="button">Choose BOM file</button>
+          <button class="btn secondary" id="pasteBtn" type="button">Paste from Excel</button>
+        </div>
+        <div class="sample-row">
+          <span>No file ready?</span>
+          <button class="link-button" type="button" id="loadBadSampleBtn">Load problem sample</button>
+          <span>or</span>
+          <button class="link-button" type="button" id="loadGoodSampleBtn">load clean sample</button>
+        </div>
+      </div>
+
+      <div class="paste-card hidden" id="pasteCard">
+        <div class="section-heading compact">
+          <div>
+            <p class="eyebrow">Paste mode</p>
+            <h2>Paste cells copied from Excel, Sheets, or your ERP</h2>
+          </div>
+          <button class="btn ghost" id="closePasteBtn" type="button">Close</button>
+        </div>
+        <textarea id="pasteArea" rows="10" placeholder="Reference Designator&#9;Quantity&#9;Manufacturer&#9;MPN&#9;Value&#9;Footprint&#10;R1, R2&#9;2&#9;Yageo&#9;RC0603FR-0710KL&#9;10k&#9;0603"></textarea>
+        <div class="button-row">
+          <button class="btn primary" id="analyzePasteBtn" type="button">Analyze pasted BOM</button>
+          <button class="btn secondary" id="clearPasteBtn" type="button">Clear</button>
+        </div>
+      </div>
+
+      <div id="workspace" class="workspace hidden">
+        <section class="panel source-panel">
+          <div class="source-meta">
+            <div>
+              <p class="eyebrow">Loaded source</p>
+              <h2 id="sourceName">BOM</h2>
+              <p id="sourceMeta" class="muted"></p>
+            </div>
+            <div class="button-row">
+              <button class="btn secondary" id="changeFileBtn" type="button">Load another BOM</button>
+            </div>
+          </div>
+          <div class="source-controls">
+            <label id="sheetControl" class="field hidden">
+              <span>Worksheet</span>
+              <select id="sheetSelect"></select>
+            </label>
+            <label class="field small-field">
+              <span>Header row</span>
+              <input id="headerRowInput" type="number" min="1" step="1" value="1">
+            </label>
+            <label class="field">
+              <span>Check profile</span>
+              <select id="profileSelect">
+                <option value="assembly">Assembly-ready</option>
+                <option value="procurement" selected>Procurement-ready</option>
+                <option value="release">Engineering release</option>
+              </select>
+            </label>
+            <label class="toggle-field">
+              <input id="excludeDnpToggle" type="checkbox" checked>
+              <span><strong>Exclude DNP from required-field checks</strong><small>DNP rows are still analyzed for conflicts.</small></span>
+            </label>
+            <label class="toggle-field">
+              <input id="placeholderToggle" type="checkbox" checked>
+              <span><strong>Flag placeholder data</strong><small>TBD, N/A, ?, unknown, and similar values.</small></span>
+            </label>
+            <label class="toggle-field">
+              <input id="compareQtyToggle" type="checkbox" checked>
+              <span><strong>Compare Qty with RefDes count</strong><small>Disable for build-level or purchasing quantities.</small></span>
+            </label>
+            <label class="toggle-field">
+              <input id="allowRefLessToggle" type="checkbox">
+              <span><strong>Allow rows without RefDes</strong><small>Useful for off-board, mechanical, label, or packaging items.</small></span>
+            </label>
+          </div>
+        </section>
+
+        <section class="panel mapping-panel">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Column mapping</p>
+              <h2>Confirm what each BOM column means</h2>
+              <p class="muted">Headers are mapped automatically. Change any incorrect match before relying on the report.</p>
+            </div>
+            <button class="btn ghost" id="resetMappingBtn" type="button">Reset auto-mapping</button>
+          </div>
+          <div id="mappingGrid" class="mapping-grid"></div>
+        </section>
+
+        <section class="results-header">
+          <div>
+            <p class="eyebrow">Analysis</p>
+            <h2>BOM review report</h2>
+          </div>
+          <div class="button-row">
+            <button class="btn secondary" id="downloadIssuesBtn" type="button">Issue report CSV</button>
+            <button class="btn secondary" id="downloadReviewedBtn" type="button">Reviewed BOM CSV</button>
+            <button class="btn secondary" id="downloadJsonBtn" type="button">Full report JSON</button>
+          </div>
+        </section>
+
+        <section class="readiness-card" id="readinessCard">
+          <div>
+            <span id="readinessBadge" class="readiness-badge">—</span>
+            <h3 id="readinessTitle">Waiting for analysis</h3>
+            <p id="readinessSummary"></p>
+          </div>
+          <p class="readiness-note">This is a data-quality check, not a production approval or DFM sign-off.</p>
+        </section>
+
+        <section class="stats-grid" id="statsGrid"></section>
+
+        <section class="panel coverage-panel">
+          <div class="section-heading compact">
+            <div>
+              <p class="eyebrow">Data coverage</p>
+              <h2>How complete are the key BOM fields?</h2>
+            </div>
+          </div>
+          <div class="coverage-grid" id="coverageGrid"></div>
+        </section>
+
+        <section class="panel issues-panel">
+          <div class="section-heading issues-heading">
+            <div>
+              <p class="eyebrow">Issues</p>
+              <h2>Problems and review items</h2>
+            </div>
+            <div class="issue-filters">
+              <button class="filter active" data-filter="all" type="button">All <span id="allCount">0</span></button>
+              <button class="filter error-filter" data-filter="error" type="button">Errors <span id="errorCount">0</span></button>
+              <button class="filter warning-filter" data-filter="warning" type="button">Warnings <span id="warningCount">0</span></button>
+              <button class="filter info-filter" data-filter="info" type="button">Info <span id="infoCount">0</span></button>
+            </div>
+          </div>
+          <div class="issue-tools">
+            <input id="issueSearch" type="search" placeholder="Search issues, rows, fields, references…">
+          </div>
+          <div id="issuesList" class="issues-list"></div>
+        </section>
+
+        <section class="panel table-panel">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Source preview</p>
+              <h2>BOM rows with checker status</h2>
+              <p class="muted">The original source values are not modified. Exported reviewed BOMs add checker columns for review.</p>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table id="previewTable"></table>
+          </div>
+          <div class="pagination" id="pagination"></div>
+        </section>
+      </div>
+    </section>
+
+    <section id="rules" class="shell info-section">
+      <div class="section-heading wide-heading">
+        <div>
+          <p class="eyebrow">Rule coverage</p>
+          <h2>What the checker actually tests</h2>
+          <p class="muted">Rules are deliberately focused on data that can be validated from the BOM itself. Heuristics that would pretend to know electrical suitability or real-time sourcing status are excluded.</p>
+        </div>
+      </div>
+      <div class="rule-grid">
+        <article class="rule-card"><h3>Reference designators</h3><p>Expands common numeric ranges, detects duplicates within a row and across rows, highlights suspicious RefDes formatting, and identifies placed/DNP conflicts.</p></article>
+        <article class="rule-card"><h3>Quantity consistency</h3><p>Checks for blank, non-numeric, fractional, zero, and negative quantities, then compares placed quantity with the number of unique reference designators.</p></article>
+        <article class="rule-card"><h3>Part identity</h3><p>Checks manufacturer, MPN and internal-part-number data, flags placeholders, and detects conflicting manufacturer, value, footprint, or internal-P/N mappings.</p></article>
+        <article class="rule-card"><h3>Assembly fields</h3><p>Reviews footprint/package, description/value coverage, interprets common DNP/DNI terms, and keeps DNP items visible without treating them as normal placement rows.</p></article>
+        <article class="rule-card"><h3>Sourcing consistency</h3><p>Checks supplier-P/N mappings and flags lifecycle values already present in the BOM such as EOL, obsolete, NRND, or last-time-buy for manual sourcing review.</p></article>
+        <article class="rule-card"><h3>Duplicates and cleanup</h3><p>Detects exact duplicate lines and identifies same-part rows that may be candidates for consolidation without automatically changing the BOM.</p></article>
+      </div>
+    </section>
+
+    <section id="guide" class="shell guide-section">
+      <div class="guide-layout">
+        <div>
+          <p class="eyebrow">Practical workflow</p>
+          <h2>How to use the report</h2>
+        </div>
+        <div class="guide-steps">
+          <article><span>01</span><div><h3>Start with errors</h3><p>Resolve duplicate reference designators, quantity mismatches, missing required identity fields, and invalid quantities before reviewing softer warnings.</p></div></article>
+          <article><span>02</span><div><h3>Confirm column mapping</h3><p>An incorrect mapping can create false results. This is especially important when ERP exports use internal names such as “Item”, “Part No.” or “Locations”.</p></div></article>
+          <article><span>03</span><div><h3>Review DNP logic</h3><p>Make sure DNP/DNI flags are explicit and unambiguous. A positive design BOM quantity can coexist with DNP, but the assembler needs a clear placement decision.</p></div></article>
+          <article><span>04</span><div><h3>Check sourcing identity</h3><p>For procurement, the combination of manufacturer and MPN should identify the exact component. Do not rely only on a generic description such as “10 kΩ resistor”.</p></div></article>
+          <article><span>05</span><div><h3>Export the reviewed BOM</h3><p>The reviewed CSV preserves original data and adds checker status, issue summaries, normalized designators, detected reference count, and DNP status.</p></div></article>
+          <article><span>06</span><div><h3>Still perform engineering review</h3><p>A BOM checker cannot verify stock, lifecycle, authenticity, electrical ratings, footprint geometry, polarity, AVL policy, or manufacturability. Those require engineering and supply-chain review.</p></div></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="shell limitations-section">
+      <div class="limitations-card">
+        <h2>What this tool intentionally does not claim to verify</h2>
+        <p>Real-time lifecycle or stock status, counterfeit risk, electrical suitability, voltage/current/temperature ratings, package dimensions, symbol-to-footprint correctness, PCB connectivity, polarity/orientation, feeder compatibility, stencil design, DFM/DFA, approved-vendor policy, compliance, or final production readiness.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="shell footer-inner">
+      <p>Open-source utility maintained by <a href="https://pcbcool.com/" target="_blank" rel="noopener">PCBCool</a>. Built to help engineers, buyers, makers, and hardware teams catch common BOM data problems earlier.</p>
+      <p><a href="https://github.com/LokiZhan0/pcbcool-pcb-bom-checker" target="_blank" rel="noopener">Source code</a> · MIT License</p>
+    </div>
+  </footer>
+
+  <script src="bom-core.js" defer></script>
+  <script src="app.js" defer></script>
+</body>
+</html>

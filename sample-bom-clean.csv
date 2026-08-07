@@ -1,0 +1,7 @@
+Reference Designator,Quantity,Manufacturer,MPN,Description,Value,Footprint,DNP,Supplier,Supplier Part Number,Alternate MPN,Notes
+R1-R4,4,Yageo,RC0603FR-0710KL,Thick film resistor,10k 1%,0603,No,DigiKey,311-10.0KHRCT-ND,CRCW060310K0FKEA,
+C1-C3,3,Murata,GRM188R71C104KA01D,MLCC X7R,100nF 16V,0603,No,Mouser,81-GRM188R71C104KA1D,CC0603KRX7R7BB104,
+U1,1,STMicroelectronics,STM32G431CBT6,Microcontroller,STM32G431,LQFP-48,No,DigiKey,497-19466-ND,,
+D1,1,Nexperia,1N4148W,Switching diode,1N4148,SOD-123,No,Mouser,771-1N4148W115,,
+J1,1,TE Connectivity,1-1734592-0,Board connector,10 position,1.0mm connector,No,DigiKey,A100201CT-ND,,
+LED1,1,Lite-On,LTST-C190KGKT,Green indicator LED,Green,0603,DNP,DigiKey,160-1446-1-ND,,Optional indicator not fitted

@@ -1,0 +1,14 @@
+Project,Controller Board Rev C,,,,,,,,,,
+Reference Designator,Quantity,Manufacturer,MPN,Description,Value,Footprint,DNP,Supplier,Supplier Part Number,Alternate MPN,Notes
+R1-R4,4,Yageo,RC0603FR-0710KL,Resistor,10k,0603,No,DigiKey,311-10.0KHRCT-ND,,
+C1 C2 C3,2,Murata,GRM188R71C104KA01D,MLCC,100nF,0603,No,Mouser,81-GRM188R71C104KA1D,,Quantity should be 3
+U1,1,Texas Instruments,TBD,MCU,,QFN-48,No,DigiKey,,,MPN pending
+D1,1,Nexperia,1N4148W,Switching diode,1N4148,SOD-123,No,Mouser,771-1N4148W115,,
+D1,1,Nexperia,1N4148W,Switching diode,1N4148,SOD-323,No,Mouser,771-1N4148W115,,Duplicate RefDes and footprint conflict
+R5,1,Yageo,RC0603FR-0710KL,Resistor,47k,0603,No,DigiKey,311-10.0KHRCT-ND,,Same MPN with different value
+C4,0,Murata,GRM188R71H103KA01D,MLCC,10nF,0603,No,Mouser,81-GRM188R71H103KA,,Zero qty on placed row
+LED1,1,Lite-On,LTST-C190KGKT,Green LED,Green,0603,DNP,DigiKey,160-1446-1-ND,,DNP with positive qty
+J1,1,TE Connectivity,1-1734592-0,Connector,10 pos,,No,DigiKey,A100201CT-ND,,Missing footprint
+R6,1,Yageo,RC0603FR-0710KL,Resistor,10k,0603,No,DigiKey,311-10.0KHRCT-ND,,
+R6,1,Yageo,RC0603FR-0710KL,Resistor,10k,0603,DNP,DigiKey,311-10.0KHRCT-ND,,Same ref placed and DNP
+TP1,-1,,,Test point,,TestPoint,No,,,,Negative quantity
